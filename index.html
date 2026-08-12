@@ -16,6 +16,8 @@
 
         <title>Previsão do Tempo</title>
 
+        <link rel="icon" type="image/png" href="./assets/img/icone_pg_vpgms.png" />
+
         <link
             rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.12/css/weather-icons.min.css"
@@ -27,19 +29,39 @@
     </head>
 
     <body class="periodo-dia">
+        <header class="cabecalho-portfolio">
+            <div class="cabecalho-conteudo">
+                <a
+                    class="cabecalho-portfolio-link"
+                    href="https://victorpgms.github.io/portifolio-vpgms"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Abrir portifolio de Victor Pedro em nova guia"
+                >
+                    <span class="cabecalho-identidade">
+                        <span class="cabecalho-autor">Victor Pedro</span>
+                        <span class="cabecalho-separador" aria-hidden="true">|</span>
+                        <span class="cabecalho-projeto">Projeto Clima</span>
+                    </span>
+                </a>
+
+                <button
+                    type="button"
+                    id="botao-tema"
+                    class="botao-tema btn-theme"
+                    aria-pressed="false"
+                    aria-label="Ativar tema escuro"
+                    title="Ativar tema escuro"
+                >
+                    <i class="wi wi-night-clear" aria-hidden="true"></i>
+                </button>
+            </div>
+        </header>
+
         <main class="container">
             <section class="card" aria-labelledby="titulo-app">
                 <div class="topo-card">
                     <h1 id="titulo-app">Previsão do Tempo</h1>
-
-                    <button
-                        type="button"
-                        id="botao-tema"
-                        class="botao-tema"
-                        aria-pressed="false"
-                    >
-                        Tema escuro
-                    </button>
                 </div>
 
                 <p class="descricao">

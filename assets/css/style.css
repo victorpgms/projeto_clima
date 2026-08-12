@@ -16,6 +16,12 @@
     --cor-carregando: #1d4ed8;
     --cor-icone: #f59e0b;
     --sombra-card: 0 16px 40px rgba(31, 41, 55, 0.12);
+    --cor-cabecalho-fundo: linear-gradient(90deg, #2563eb 0%, #4338ca 100%);
+    --cor-cabecalho-texto: #ffffff;
+    --cor-cabecalho-texto-suave: #dbeafe;
+    --cor-cabecalho-borda: rgba(255, 255, 255, 0.18);
+    --cor-cabecalho-acento: #facc15;
+    --sombra-cabecalho: 0 14px 34px rgba(37, 99, 235, 0.18);
 }
 
 body {
@@ -48,6 +54,12 @@ body.periodo-noite {
     --cor-carregando: #93c5fd;
     --cor-icone: #facc15;
     --sombra-card: 0 16px 40px rgba(0, 0, 0, 0.35);
+    --cor-cabecalho-fundo: linear-gradient(90deg, #1d4ed8 0%, #312e81 100%);
+    --cor-cabecalho-texto: #ffffff;
+    --cor-cabecalho-texto-suave: #dbeafe;
+    --cor-cabecalho-borda: rgba(255, 255, 255, 0.16);
+    --cor-cabecalho-acento: #facc15;
+    --sombra-cabecalho: 0 14px 34px rgba(0, 0, 0, 0.28);
     background:
         radial-gradient(
             circle at top left,
@@ -69,6 +81,12 @@ body.tema-escuro {
     --cor-carregando: #93c5fd;
     --cor-icone: #facc15;
     --sombra-card: 0 16px 40px rgba(0, 0, 0, 0.35);
+    --cor-cabecalho-fundo: linear-gradient(90deg, #1d4ed8 0%, #312e81 100%);
+    --cor-cabecalho-texto: #ffffff;
+    --cor-cabecalho-texto-suave: #dbeafe;
+    --cor-cabecalho-borda: rgba(255, 255, 255, 0.16);
+    --cor-cabecalho-acento: #facc15;
+    --sombra-cabecalho: 0 14px 34px rgba(0, 0, 0, 0.28);
     background:
         radial-gradient(
             circle at top left,
@@ -76,6 +94,74 @@ body.tema-escuro {
             transparent 28rem
         ),
         var(--cor-fundo);
+}
+
+.cabecalho-portfolio {
+    width: 100%;
+    background: var(--cor-cabecalho-fundo);
+    border-bottom: 1px solid var(--cor-cabecalho-borda);
+    box-shadow: var(--sombra-cabecalho);
+}
+
+.cabecalho-portfolio-link {
+    flex: 1;
+    min-width: 0;
+    color: var(--cor-cabecalho-texto);
+    text-decoration: none;
+}
+
+.cabecalho-conteudo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    width: min(100%, 1120px);
+    min-height: 88px;
+    margin: 0 auto;
+    padding: 20px 24px;
+    color: inherit;
+}
+
+.cabecalho-identidade {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 10px;
+    line-height: 1.4;
+    letter-spacing: 0;
+}
+
+.cabecalho-portfolio-link:focus-visible {
+    outline: 3px solid rgba(255, 255, 255, 0.72);
+    outline-offset: 6px;
+    border-radius: 8px;
+}
+
+.cabecalho-portfolio-link:hover .cabecalho-projeto {
+    color: var(--cor-cabecalho-texto);
+}
+
+.cabecalho-autor {
+    color: var(--cor-cabecalho-texto);
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.cabecalho-separador {
+    flex: 0 0 auto;
+    color: var(--cor-cabecalho-acento);
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.cabecalho-projeto {
+    min-width: 0;
+    color: var(--cor-cabecalho-texto-suave);
+    font-size: 19px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
 }
 
 .container {
@@ -109,19 +195,43 @@ h1 {
     color: var(--cor-primaria);
 }
 
-.botao-tema {
+.btn-theme {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex: 0 0 auto;
+    width: 46px;
+    height: 46px;
     margin-top: 0;
-    padding: 9px 12px;
-    border: 1px solid var(--cor-borda);
-    background-color: transparent;
-    color: var(--cor-texto);
-    font-size: 14px;
-    font-weight: 700;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 50%;
+    background-color: rgba(15, 23, 42, 0.82);
+    color: #ffffff;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.22);
+    font-size: 1.25rem;
+    line-height: 1;
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
-.botao-tema:hover {
-    background-color: rgba(56, 189, 248, 0.12);
+.btn-theme:hover {
+    background-color: rgba(15, 23, 42, 0.95);
+    color: var(--cor-cabecalho-acento);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.28);
+    transform: translateY(-2px);
+}
+
+.btn-theme:focus-visible {
+    outline: 3px solid rgba(255, 255, 255, 0.72);
+    outline-offset: 4px;
+}
+
+.btn-theme .wi {
+    line-height: 1;
 }
 
 .descricao {
@@ -339,6 +449,35 @@ body.tema-escuro .previsao-dia {
 }
 
 @media screen and (max-width: 600px) {
+    .cabecalho-conteudo {
+        align-items: center;
+        gap: 12px;
+        min-height: 0;
+        padding: 16px 14px;
+    }
+
+    .cabecalho-identidade {
+        gap: 8px;
+    }
+
+    .cabecalho-autor {
+        font-size: 25px;
+    }
+
+    .cabecalho-separador {
+        font-size: 18px;
+    }
+
+    .cabecalho-projeto {
+        font-size: 16px;
+    }
+
+    .btn-theme {
+        width: 42px;
+        height: 42px;
+        font-size: 1.1rem;
+    }
+
     .container {
         padding-inline: 14px;
     }

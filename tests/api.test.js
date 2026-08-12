@@ -575,19 +575,38 @@ describe("API de previsão do tempo", () => {
         const fetchMock = jest.fn();
         const { elementos, clickTema } = carregarModuloComDOM(fetchMock);
 
-        expect(elementos.botaoTema.textContent).toBe("Tema escuro");
+        expect(elementos.botaoTema.textContent).toBe("");
+        expect(elementos.botaoTema.children[0].className).toBe(
+            "wi wi-night-clear",
+        );
         expect(elementos.botaoTema.atributos["aria-pressed"]).toBe("false");
+        expect(elementos.botaoTema.atributos["aria-label"]).toBe(
+            "Ativar tema escuro",
+        );
+        expect(elementos.botaoTema.atributos.title).toBe("Ativar tema escuro");
 
         clickTema();
 
         expect(elementos.body.classList.contains("tema-escuro")).toBe(true);
-        expect(elementos.botaoTema.textContent).toBe("Tema claro");
+        expect(elementos.botaoTema.textContent).toBe("");
+        expect(elementos.botaoTema.children[0].className).toBe("wi wi-day-sunny");
         expect(elementos.botaoTema.atributos["aria-pressed"]).toBe("true");
+        expect(elementos.botaoTema.atributos["aria-label"]).toBe(
+            "Ativar tema claro",
+        );
+        expect(elementos.botaoTema.atributos.title).toBe("Ativar tema claro");
 
         clickTema();
 
         expect(elementos.body.classList.contains("tema-escuro")).toBe(false);
-        expect(elementos.botaoTema.textContent).toBe("Tema escuro");
+        expect(elementos.botaoTema.textContent).toBe("");
+        expect(elementos.botaoTema.children[0].className).toBe(
+            "wi wi-night-clear",
+        );
         expect(elementos.botaoTema.atributos["aria-pressed"]).toBe("false");
+        expect(elementos.botaoTema.atributos["aria-label"]).toBe(
+            "Ativar tema escuro",
+        );
+        expect(elementos.botaoTema.atributos.title).toBe("Ativar tema escuro");
     });
 });
