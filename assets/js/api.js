@@ -37,6 +37,10 @@ const precipitacaoAtual = temDOM
 const previsaoLista = temDOM ? document.querySelector("#previsao-lista") : null;
 
 const CLASSE_TEMA_ESCURO = "tema-escuro";
+const HOSTS_DEBUG = ["localhost", "127.0.0.1", "::1"];
+const MODO_DEBUG =
+    typeof window !== "undefined" &&
+    HOSTS_DEBUG.includes(window.location?.hostname);
 
 const FORMATADOR_DATA = new Intl.DateTimeFormat("pt-BR", {
     weekday: "long",
@@ -423,15 +427,17 @@ function validarPrevisaoDiaria(previsaoDiaria) {
  * @throws {ErroRede} Quando `fetch` rejeita por erro de conexão.
  * @throws {FalhaApiError} Quando a API responde com erro HTTP, limite de
  * requisições ou JSON inválido.
+ * @throws {EntradaInvalidaError} Quando a URL informada não usa HTTPS.
  *
  * @example
  * const dados = await buscarJson(new URL("https://api.example.com"), "API indisponível.");
  */
 async function buscarJson(url, mensagemErroApi) {
+    const urlSegura = normalizarUrlSegura(url);
     let resposta;
 
     try {
-        resposta = await fetch(url);
+        resposta = await fetch(urlSegura);
     } catch (erro) {
         throw new ErroRede(undefined, { cause: erro });
     }
@@ -451,6 +457,18 @@ async function buscarJson(url, mensagemErroApi) {
     } catch {
         throw new FalhaApiError("A API retornou uma resposta inválida.");
     }
+}
+
+function normalizarUrlSegura(url) {
+    const urlNormalizada = url instanceof URL ? url : new URL(url);
+
+    if (urlNormalizada.protocol !== "https:") {
+        throw new EntradaInvalidaError(
+            "A aplicação permite apenas requisições HTTPS.",
+        );
+    }
+
+    return urlNormalizada;
 }
 
 function exibirResultado(local, dadosClima) {
@@ -568,26 +586,33 @@ function renderizarPrevisao(previsaoDiaria, unidadesDiarias = {}) {
     const unidadeMaxima = unidadesDiarias.temperature_2m_max ?? "°C";
     const unidadeMinima = unidadesDiarias.temperature_2m_min ?? unidadeMaxima;
     const previsoes = obterPrevisaoDiaria(previsaoDiaria);
+    const elementosPrevisao = previsoes.map((previsao) => {
+        const item = document.createElement("article");
+        const data = document.createElement("span");
+        const temperaturas = document.createElement("p");
+        const maxima = document.createElement("strong");
+        const minima = document.createElement("strong");
 
-    previsaoLista.innerHTML = previsoes
-        .map(
-            (previsao) => `
-                <article class="previsao-dia">
-                    <span>${formatarDataCurta(previsao.data)}</span>
-                    <p class="previsao-temperaturas">
-                        <strong>Máx: ${formatarMedida(
-                            previsao.maxima,
-                            unidadeMaxima,
-                        )}</strong>
-                        <strong>Mín: ${formatarMedida(
-                            previsao.minima,
-                            unidadeMinima,
-                        )}</strong>
-                    </p>
-                </article>
-            `,
-        )
-        .join("");
+        item.className = "previsao-dia";
+        temperaturas.className = "previsao-temperaturas";
+
+        data.textContent = formatarDataCurta(previsao.data);
+        maxima.textContent = `Máx: ${formatarMedida(
+            previsao.maxima,
+            unidadeMaxima,
+        )}`;
+        minima.textContent = `Mín: ${formatarMedida(
+            previsao.minima,
+            unidadeMinima,
+        )}`;
+
+        temperaturas.append(maxima, minima);
+        item.append(data, temperaturas);
+
+        return item;
+    });
+
+    previsaoLista.replaceChildren(...elementosPrevisao);
 }
 
 function alternarTemaEscuro() {
@@ -639,7 +664,7 @@ function mostrarMensagem(texto, tipo) {
 }
 
 function tratarErro(erro) {
-    console.error(erro);
+    registrarErro(erro);
 
     if (erro instanceof CidadeNaoEncontradaError) {
         mostrarMensagem(
@@ -665,6 +690,12 @@ function tratarErro(erro) {
     esconderResultado();
 }
 
+function registrarErro(erro) {
+    if (MODO_DEBUG || !temDOM) {
+        console.error(erro);
+    }
+}
+
 if (typeof module !== "undefined" && module.exports) {
     module.exports = {
         buscarLocalizacao,
@@ -677,6 +708,7 @@ if (typeof module !== "undefined" && module.exports) {
         formatarDataHora,
         formatarDataCurta,
         obterPrevisaoDiaria,
+        normalizarUrlSegura,
         CidadeNaoEncontradaError,
         FalhaApiError,
         ErroRede,

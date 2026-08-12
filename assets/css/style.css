@@ -19,6 +19,8 @@
 }
 
 body {
+    display: flex;
+    flex-direction: column;
     font-family: Arial, Helvetica, sans-serif;
     background:
         radial-gradient(
@@ -77,11 +79,11 @@ body.tema-escuro {
 }
 
 .container {
-    min-height: 100vh;
+    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px;
+    padding: 20px 20px 12px;
 }
 
 .card {
@@ -313,7 +315,34 @@ body.tema-escuro .previsao-dia {
     line-height: 1.5;
 }
 
+.rodape-info {
+    width: 100%;
+    padding: 6px 20px 22px;
+    color: var(--cor-texto-suave);
+    font-size: 12px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.rodape-info p + p {
+    margin-top: 8px;
+}
+
+.rodape-info a {
+    color: var(--cor-primaria);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.rodape-info a:hover {
+    text-decoration: underline;
+}
+
 @media screen and (max-width: 600px) {
+    .container {
+        padding-inline: 14px;
+    }
+
     .card {
         padding: 24px 18px;
     }
@@ -349,5 +378,9 @@ body.tema-escuro .previsao-dia {
     .detalhes-clima,
     .previsao-lista {
         grid-template-columns: 1fr;
+    }
+
+    .rodape-info {
+        padding-inline: 14px;
     }
 }

@@ -3,6 +3,11 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta
+            http-equiv="Content-Security-Policy"
+            content="default-src 'self'; script-src 'self'; style-src 'self' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com; connect-src https://api.open-meteo.com https://geocoding-api.open-meteo.com; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests"
+        />
+        <meta name="referrer" content="no-referrer" />
 
         <meta
             name="description"
@@ -14,6 +19,9 @@
         <link
             rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.12/css/weather-icons.min.css"
+            integrity="sha384-8ioow4WaFbARExkpndAd5R4b//QLKDDHmz9yjO71m1D7+2vEb3nbPssEfRK1qKud"
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
         />
         <link rel="stylesheet" href="./assets/css/style.css" />
     </head>
@@ -97,9 +105,32 @@
                         <h3 id="titulo-previsao">Próximos 5 dias</h3>
                         <div id="previsao-lista" class="previsao-lista"></div>
                     </section>
+
                 </section>
             </section>
         </main>
+
+        <footer class="rodape-info" aria-label="Informações de privacidade e créditos">
+            <p>
+                Esta aplicação não coleta, armazena ou compartilha dados
+                pessoais. As buscas são processadas em tempo real e não são
+                registradas pela aplicação.
+            </p>
+
+            <p>
+                Dados meteorológicos fornecidos por
+                <a href="https://open-meteo.com/" rel="noopener noreferrer">
+                    Open-Meteo.com
+                </a>
+                sob licença
+                <a
+                    href="https://creativecommons.org/licenses/by/4.0/"
+                    rel="noopener noreferrer"
+                >
+                    CC BY 4.0
+                </a>.
+            </p>
+        </footer>
 
         <script src="./assets/js/api.js"></script>
     </body>

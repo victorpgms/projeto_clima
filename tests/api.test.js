@@ -9,6 +9,7 @@ const {
     formatarDataHora,
     formatarDataCurta,
     obterPrevisaoDiaria,
+    normalizarUrlSegura,
     CidadeNaoEncontradaError,
     FalhaApiError,
     ErroRede,
@@ -99,15 +100,43 @@ function criarClassList(classesIniciais = []) {
     };
 }
 
+function obterTextoElemento(elemento) {
+    if (!elemento) {
+        return "";
+    }
+
+    if (elemento._textContent) {
+        return elemento._textContent;
+    }
+
+    return elemento.children?.map(obterTextoElemento).join("") ?? "";
+}
+
 function criarElemento(id) {
     return {
         id,
         value: "",
-        textContent: "",
+        _textContent: "",
+        get textContent() {
+            return obterTextoElemento(this);
+        },
+        set textContent(valor) {
+            this._textContent = valor;
+        },
         className: "",
+        innerHTML: "",
+        children: [],
         disabled: false,
         classList: criarClassList(),
         atributos: {},
+        append(...filhos) {
+            this.children.push(...filhos);
+            this.innerHTML = this.children.map(obterTextoElemento).join("");
+        },
+        replaceChildren(...filhos) {
+            this.children = filhos;
+            this.innerHTML = this.children.map(obterTextoElemento).join("");
+        },
         setAttribute(nome, valor) {
             this.atributos[nome] = valor;
         },
@@ -149,6 +178,9 @@ function carregarModuloComDOM(fetchMock) {
     global.fetch = fetchMock;
     global.document = {
         body: elementos.body,
+        createElement(tagName) {
+            return criarElemento(tagName);
+        },
         querySelector(seletor) {
             const seletores = {
                 "#form-clima": elementos.form,
@@ -286,6 +318,16 @@ describe("API de previsão do tempo", () => {
         await expect(
             buscarJson(new URL("https://api.example.test"), "API indisponível."),
         ).rejects.toThrow("API indisponível.");
+    });
+
+    test("bloqueia requisições fora de HTTPS", async () => {
+        expect(() => normalizarUrlSegura("http://api.example.test")).toThrow(
+            EntradaInvalidaError,
+        );
+        await expect(
+            buscarJson("http://api.example.test", "API indisponível."),
+        ).rejects.toThrow("A aplicação permite apenas requisições HTTPS.");
+        expect(global.fetch).not.toHaveBeenCalled();
     });
 
     test("trata limite de requisições da API", async () => {

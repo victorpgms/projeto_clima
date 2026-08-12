@@ -1,14 +1,14 @@
 {
     "name": "projeto_clima",
     "version": "1.0.0",
-    "description": "",
-    "main": "tests.js",
+    "description": "Aplicativo web de consulta climática com Open-Meteo, previsão de 5 dias e testes automatizados.",
+    "main": "assets/js/api.js",
     "scripts": {
         "test": "jest"
     },
     "keywords": [],
     "author": "",
-    "license": "ISC",
+    "license": "MIT",
     "type": "commonjs",
     "devDependencies": {
         "jest": "^30.4.2"
