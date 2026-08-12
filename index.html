@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-br">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <meta
+            name="description"
+            content="Aplicativo de previsão do tempo utilizando a API Open-Meteo"
+        />
+
+        <title>Previsão do Tempo</title>
+
+        <link rel="stylesheet" href="./assets/css/style.css" />
+    </head>
+
+    <body>
+        <main class="container">
+            <section class="card">
+                <h1>🌤️ Previsão do Tempo</h1>
+
+                <p class="descricao">
+                    Digite o nome de uma cidade para consultar a temperatura
+                    atual.
+                </p>
+
+                <form id="form-clima">
+                    <label for="cidade">Cidade</label>
+
+                    <input
+                        type="text"
+                        id="cidade"
+                        name="cidade"
+                        placeholder="Ex: São Paulo"
+                        required
+                    />
+
+                    <button type="submit">Buscar clima</button>
+                </form>
+
+                <p id="mensagem"></p>
+
+                <section id="resultado" class="resultado">
+                    <h2 id="nome-cidade"></h2>
+
+                    <p class="temperatura">
+                        <span id="temperatura"></span>
+                    </p>
+                </section>
+            </section>
+        </main>
+
+        <script src="./assets/js/api.js"></script>
+    </body>
+</html>
