@@ -629,8 +629,17 @@ function atualizarBotaoTema(
         return;
     }
 
-    botaoTema.textContent = temaEscuroAtivo ? "Tema claro" : "Tema escuro";
+    const rotulo = temaEscuroAtivo ? "Ativar tema claro" : "Ativar tema escuro";
+    const classeIcone = temaEscuroAtivo ? "wi-day-sunny" : "wi-night-clear";
+    const icone = document.createElement("i");
+
+    icone.className = `wi ${classeIcone}`;
+    icone.setAttribute("aria-hidden", "true");
+
+    botaoTema.replaceChildren(icone);
     botaoTema.setAttribute("aria-pressed", String(temaEscuroAtivo));
+    botaoTema.setAttribute("aria-label", rotulo);
+    botaoTema.setAttribute("title", rotulo);
 }
 
 function iniciarBusca() {
