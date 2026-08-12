@@ -1,0 +1,300 @@
+# 🌤️ Projeto Clima
+
+Aplicação web para consulta da **previsão do tempo atual** a partir do nome de uma cidade.
+
+O projeto foi desenvolvido utilizando **HTML, CSS e JavaScript**, consumindo a API pública **Open-Meteo** por meio da `Fetch API`. A aplicação também conta com tratamento de erros, interface responsiva e testes automatizados utilizando **Jest**.
+
+---
+
+## 🚀 Funcionalidades
+
+- 🔎 Busca de cidade pelo nome;
+- 📍 Conversão da cidade em latitude e longitude;
+- 🌡️ Consulta da temperatura atual;
+- ☀️ Identificação da condição climática;
+- 🌙 Alteração visual da interface entre dia e noite;
+- 🌤️ Ícones de acordo com a condição do tempo;
+- 🕐 Exibição da data e hora da consulta;
+- 📱 Layout responsivo para desktop e dispositivos móveis;
+- ⚠️ Tratamento de erros e entradas inválidas;
+- 🧪 Testes automatizados com Jest.
+
+---
+
+## 🛠️ Tecnologias utilizadas
+
+- **HTML5**
+- **CSS3**
+- **JavaScript**
+- **Fetch API**
+- **Open-Meteo API**
+- **Jest**
+- **Node.js / NPM**
+- **Git e GitHub**
+
+Para a representação visual das condições climáticas, também são utilizados ícones do **Weather Icons**.
+
+---
+
+## 🌎 API utilizada
+
+O projeto utiliza a **Open-Meteo**, uma API pública de dados meteorológicos.
+
+São realizadas duas consultas principais:
+
+### Geocoding API
+
+Responsável por localizar a cidade informada pelo usuário e retornar suas coordenadas geográficas.
+
+```text
+https://geocoding-api.open-meteo.com/v1/search
+```
+
+### Forecast API
+
+Utiliza a latitude e longitude encontradas para consultar os dados meteorológicos atuais.
+
+```text
+https://api.open-meteo.com/v1/forecast
+```
+
+---
+
+## 🔄 Funcionamento da aplicação
+
+O fluxo principal da aplicação é:
+
+```text
+Usuário informa uma cidade
+        ↓
+Validação da entrada
+        ↓
+Consulta à Geocoding API
+        ↓
+Latitude e longitude
+        ↓
+Consulta à Forecast API
+        ↓
+Tratamento dos dados
+        ↓
+Exibição do clima no Frontend
+```
+
+Por exemplo, ao pesquisar:
+
+```text
+São Paulo
+```
+
+a aplicação localiza as coordenadas da cidade e apresenta informações como:
+
+```text
+São Paulo - São Paulo, Brasil
+
+☀️ Principalmente limpo
+
+25,4°C
+
+Consulta realizada em...
+```
+
+---
+
+## 📂 Estrutura do projeto
+
+```text
+projeto_clima/
+│
+├── assets/
+│   ├── css/
+│   │   └── style.css
+│   │
+│   ├── img/
+│   └── js/
+│       └── api.js
+│
+├── tests/
+│   └── api.test.js
+│
+├── index.html
+├── package.json
+├── package-lock.json
+├── .gitignore
+└── README.md
+```
+
+---
+
+## ⚙️ Como executar o projeto
+
+### 1. Clone o repositório
+
+```bash
+git clone https://github.com/victorpgms/projeto_clima.git
+```
+
+### 2. Acesse a pasta
+
+```bash
+cd projeto_clima
+```
+
+### 3. Instale as dependências de desenvolvimento
+
+```bash
+npm install
+```
+
+### 4. Abra a aplicação
+
+Abra o arquivo:
+
+```text
+index.html
+```
+
+diretamente no navegador ou utilize uma extensão como **Live Server** no Visual Studio Code.
+
+---
+
+## 🧪 Testes automatizados
+
+Os testes foram desenvolvidos utilizando **Jest**.
+
+Para executar a suíte de testes:
+
+```bash
+npm test
+```
+
+Os testes utilizam **mocks da Fetch API**, permitindo simular diferentes respostas sem realizar requisições reais à Open-Meteo durante a execução.
+
+Entre os cenários testados estão:
+
+- Cidade válida;
+- Cidade inexistente;
+- Entrada vazia;
+- Coordenadas inválidas;
+- Retorno correto dos dados meteorológicos;
+- Erros HTTP da API;
+- Limite de requisições (`429`);
+- Falha de conexão com a rede;
+- JSON inválido;
+- Mudanças inesperadas na estrutura da resposta;
+- Dados meteorológicos incompletos;
+- Conversão dos códigos climáticos;
+- Formatação da temperatura;
+- Formatação de cidade, data e hora;
+- Exibição dos resultados na interface;
+- Exibição de mensagens de erro no Frontend.
+
+---
+
+## 📊 Cobertura de testes
+
+Também é possível gerar o relatório de cobertura utilizando:
+
+```bash
+npm test -- --coverage
+```
+
+Na versão atual do projeto, a cobertura registrada para o arquivo principal `api.js` é:
+
+| Métrica    | Cobertura |
+| ---------- | --------: |
+| Statements |    94,91% |
+| Branches   |    81,01% |
+| Functions  |      100% |
+| Lines      |    94,91% |
+
+O relatório HTML pode ser consultado localmente na pasta:
+
+```text
+coverage/lcov-report/
+```
+
+---
+
+## ⚠️ Tratamento de erros
+
+A aplicação possui tratamento específico para diferentes situações que podem ocorrer durante a consulta.
+
+Entre elas:
+
+```text
+Cidade não encontrada
+Entrada inválida
+Coordenadas inválidas
+Falha da API
+Limite de requisições excedido
+Erro de conexão
+Resposta JSON inválida
+Dados meteorológicos incompletos
+```
+
+Dessa forma, erros externos não interrompem a aplicação sem fornecer uma resposta adequada ao usuário.
+
+---
+
+## 📱 Responsividade
+
+A interface foi construída para funcionar em diferentes tamanhos de tela, incluindo:
+
+- Desktop;
+- Notebook;
+- Tablet;
+- Smartphone.
+
+O CSS utiliza `media queries` para adaptar os elementos em dispositivos com telas menores.
+
+---
+
+## 🤖 Inteligência Artificial no desenvolvimento
+
+Ferramentas de Inteligência Artificial foram utilizadas como apoio durante diferentes etapas do desenvolvimento, incluindo:
+
+- Estruturação inicial da solução;
+- Revisão e melhoria do código;
+- Identificação de possíveis erros;
+- Geração e revisão de testes unitários;
+- Análise de casos extremos;
+- Documentação do projeto.
+
+As sugestões geradas foram analisadas e adaptadas de acordo com os requisitos e comportamento esperado da aplicação.
+
+---
+
+## 🎯 Objetivo do projeto
+
+Este projeto foi desenvolvido com o objetivo de praticar conceitos fundamentais do desenvolvimento web, como:
+
+- Manipulação do DOM;
+- Programação assíncrona;
+- `async` e `await`;
+- Requisições HTTP;
+- Consumo de APIs REST;
+- Manipulação de JSON;
+- Tratamento de exceções;
+- Validação de dados;
+- Responsividade;
+- Testes unitários;
+- Mocks;
+- Versionamento com Git;
+- Uso crítico de ferramentas de Inteligência Artificial.
+
+---
+
+## 👨‍💻 Autor
+
+**Victor Pedro**
+
+Desenvolvedor em formação com foco em desenvolvimento Full Stack.
+
+- GitHub: [@victorpgms](https://github.com/victorpgms)
+- Repositório: [projeto_clima](https://github.com/victorpgms/projeto_clima)
+
+---
+
+## 📄 Licença
+
+Projeto desenvolvido para fins educacionais e de estudo.

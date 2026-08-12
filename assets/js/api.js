@@ -1,3 +1,15 @@
+/**
+ * @fileoverview Integra a interface de previsão do tempo com as APIs da
+ * Open-Meteo para buscar coordenadas, clima atual, descrição textual,
+ * ícone representativo e data/hora da consulta.
+ *
+ * @example
+ * buscarLocalizacao("São Paulo")
+ *     .then((local) => buscarClimaAtual(local.latitude, local.longitude))
+ *     .then((dadosClima) => console.log(dadosClima.current.temperature_2m))
+ *     .catch((erro) => console.error(erro.message));
+ */
+
 const temDOM = typeof document !== "undefined";
 
 const formClima = temDOM ? document.querySelector("#form-clima") : null;
@@ -15,6 +27,18 @@ const descricaoClima = temDOM
 
 const iconeClima = temDOM ? document.querySelector("#icone-clima") : null;
 const dataConsulta = temDOM ? document.querySelector("#data-consulta") : null;
+
+const FORMATADOR_DATA = new Intl.DateTimeFormat("pt-BR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+});
+
+const FORMATADOR_HORA = new Intl.DateTimeFormat("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+});
 
 const CLIMA_POR_CODIGO = {
     0: {
@@ -159,20 +183,46 @@ const CLIMA_POR_CODIGO = {
     },
 };
 
-class CidadeNaoEncontradaError extends Error {}
-class FalhaApiError extends Error {}
-class ErroRede extends Error {}
-class EntradaInvalidaError extends Error {}
+class CidadeNaoEncontradaError extends Error {
+    constructor(message = "Cidade não encontrada.") {
+        super(message);
+        this.name = "CidadeNaoEncontradaError";
+    }
+}
+
+class FalhaApiError extends Error {
+    constructor(message = "A API falhou. Tente novamente em alguns instantes.") {
+        super(message);
+        this.name = "FalhaApiError";
+    }
+}
+
+class ErroRede extends Error {
+    constructor(
+        message = "Erro de rede. Verifique sua conexão e tente novamente.",
+        options = {},
+    ) {
+        super(message);
+        this.name = "ErroRede";
+        this.cause = options.cause;
+    }
+}
+
+class EntradaInvalidaError extends Error {
+    constructor(message = "Entrada inválida.") {
+        super(message);
+        this.name = "EntradaInvalidaError";
+    }
+}
 
 if (formClima) {
     formClima.addEventListener("submit", async function (event) {
         event.preventDefault();
 
-        const cidade = inputCidade.value.trim();
+        const cidade = inputCidade?.value.trim() ?? "";
 
         if (!cidade) {
             mostrarMensagem("Digite o nome de uma cidade.", "erro");
-
             esconderResultado();
             return;
         }
@@ -195,6 +245,23 @@ if (formClima) {
         }
     });
 }
+
+/**
+ * Busca latitude, longitude e metadados de uma cidade pela API de
+ * Geocodificação da Open-Meteo.
+ *
+ * @param {string} cidade - Nome da cidade informada pelo usuário.
+ * @returns {Promise<Object>} Primeiro resultado encontrado pela API, contendo
+ * propriedades como `name`, `admin1`, `country`, `latitude` e `longitude`.
+ * @throws {EntradaInvalidaError} Quando `cidade` não é uma string preenchida.
+ * @throws {CidadeNaoEncontradaError} Quando a API não encontra resultados.
+ * @throws {FalhaApiError} Quando a API responde com erro ou JSON inválido.
+ * @throws {ErroRede} Quando a requisição não chega à API por falha de rede.
+ *
+ * @example
+ * const local = await buscarLocalizacao("São Paulo");
+ * console.log(local.latitude, local.longitude);
+ */
 async function buscarLocalizacao(cidade) {
     const cidadeTratada = typeof cidade === "string" ? cidade.trim() : "";
 
@@ -223,12 +290,37 @@ async function buscarLocalizacao(cidade) {
     return dados.results[0];
 }
 
+/**
+ * Busca os dados climáticos atuais para uma latitude e longitude.
+ *
+ * @param {number|string} latitude - Latitude do local consultado.
+ * @param {number|string} longitude - Longitude do local consultado.
+ * @returns {Promise<Object>} Resposta da API Forecast da Open-Meteo com
+ * `current.temperature_2m`, `current.weather_code`, `current.is_day` e unidades.
+ * @throws {EntradaInvalidaError} Quando latitude ou longitude não são números.
+ * @throws {FalhaApiError} Quando a API falha, retorna JSON inválido ou dados
+ * climáticos incompletos.
+ * @throws {ErroRede} Quando ocorre falha de rede.
+ *
+ * @example
+ * const clima = await buscarClimaAtual(-23.55, -46.63);
+ * console.log(`${clima.current.temperature_2m}°C`);
+ */
 async function buscarClimaAtual(latitude, longitude) {
+    const latitudeNumerica = Number(latitude);
+    const longitudeNumerica = Number(longitude);
+
+    if (!Number.isFinite(latitudeNumerica) || !Number.isFinite(longitudeNumerica)) {
+        throw new EntradaInvalidaError(
+            "Latitude e longitude devem ser números válidos.",
+        );
+    }
+
     const url = new URL("https://api.open-meteo.com/v1/forecast");
 
     url.search = new URLSearchParams({
-        latitude,
-        longitude,
+        latitude: String(latitudeNumerica),
+        longitude: String(longitudeNumerica),
         current: "temperature_2m,weather_code,is_day",
         temperature_unit: "celsius",
         timezone: "auto",
@@ -246,19 +338,35 @@ async function buscarClimaAtual(latitude, longitude) {
     return dados;
 }
 
+/**
+ * Executa uma requisição `fetch` e converte a resposta para JSON.
+ *
+ * @param {URL|string} url - URL do endpoint que será consultado.
+ * @param {string} mensagemErroApi - Mensagem usada quando a API responde com
+ * status HTTP de erro.
+ * @returns {Promise<Object>} Corpo JSON retornado pela API.
+ * @throws {ErroRede} Quando `fetch` rejeita por erro de conexão.
+ * @throws {FalhaApiError} Quando a API responde com erro HTTP, limite de
+ * requisições ou JSON inválido.
+ *
+ * @example
+ * const dados = await buscarJson(new URL("https://api.example.com"), "API indisponível.");
+ */
 async function buscarJson(url, mensagemErroApi) {
     let resposta;
 
     try {
         resposta = await fetch(url);
-    } catch {
-        throw new ErroRede();
+    } catch (erro) {
+        throw new ErroRede(undefined, { cause: erro });
     }
+
     if (resposta.status === 429) {
         throw new FalhaApiError(
             "Limite de requisições da API excedido. Tente novamente mais tarde.",
         );
     }
+
     if (!resposta.ok) {
         throw new FalhaApiError(mensagemErroApi);
     }
@@ -330,37 +438,36 @@ function formatarDataHora(dataHoraApi) {
 
     const [, ano, mes, dia, hora, minuto] = partes;
     const data = new Date(ano, Number(mes) - 1, dia, hora, minuto);
-    const dataFormatada = new Intl.DateTimeFormat("pt-BR", {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-    }).format(data);
-    const horaFormatada = new Intl.DateTimeFormat("pt-BR", {
-        hour: "2-digit",
-        minute: "2-digit",
-    }).format(data);
 
-    return `${dataFormatada} às ${horaFormatada}`;
+    return `${FORMATADOR_DATA.format(data)} às ${FORMATADOR_HORA.format(data)}`;
 }
 
 function iniciarBusca() {
     mostrarMensagem("Buscando previsão...", "carregando");
     esconderResultado();
-    botaoBuscar.disabled = true;
-    botaoBuscar.textContent = "Buscando...";
+
+    if (botaoBuscar) {
+        botaoBuscar.disabled = true;
+        botaoBuscar.textContent = "Buscando...";
+    }
 }
 
 function finalizarBusca() {
-    botaoBuscar.disabled = false;
-    botaoBuscar.textContent = "Buscar clima";
+    if (botaoBuscar) {
+        botaoBuscar.disabled = false;
+        botaoBuscar.textContent = "Buscar clima";
+    }
 }
 
 function esconderResultado() {
-    resultado.classList.remove("ativo");
+    resultado?.classList.remove("ativo");
 }
 
 function mostrarMensagem(texto, tipo) {
+    if (!mensagem) {
+        return;
+    }
+
     mensagem.textContent = texto;
     mensagem.className = tipo;
 }
@@ -378,6 +485,8 @@ function tratarErro(erro) {
             "Erro de rede. Verifique sua conexão e tente novamente.",
             "erro",
         );
+    } else if (erro instanceof EntradaInvalidaError) {
+        mostrarMensagem(erro.message, "erro");
     } else if (erro instanceof FalhaApiError) {
         mostrarMensagem(erro.message, "erro");
     } else {
@@ -395,6 +504,10 @@ if (typeof module !== "undefined" && module.exports) {
         buscarLocalizacao,
         buscarClimaAtual,
         buscarJson,
+        obterClima,
+        formatarNomeCidade,
+        formatarTemperatura,
+        formatarDataHora,
         CidadeNaoEncontradaError,
         FalhaApiError,
         ErroRede,
