@@ -1,0 +1,386 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --cor-fundo: #e8f4ff;
+    --cor-card: #ffffff;
+    --cor-texto: #1f2937;
+    --cor-texto-suave: #5b6472;
+    --cor-primaria: #2563eb;
+    --cor-primaria-hover: #1d4ed8;
+    --cor-borda: #d6e1ee;
+    --cor-erro: #b42318;
+    --cor-carregando: #1d4ed8;
+    --cor-icone: #f59e0b;
+    --sombra-card: 0 16px 40px rgba(31, 41, 55, 0.12);
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, Helvetica, sans-serif;
+    background:
+        radial-gradient(
+            circle at top left,
+            rgba(125, 211, 252, 0.3),
+            transparent 32rem
+        ),
+        var(--cor-fundo);
+    color: var(--cor-texto);
+    min-height: 100vh;
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease;
+}
+
+body.periodo-noite {
+    --cor-fundo: #101827;
+    --cor-card: #172033;
+    --cor-texto: #edf6ff;
+    --cor-texto-suave: #b9c6d8;
+    --cor-primaria: #38bdf8;
+    --cor-primaria-hover: #0ea5e9;
+    --cor-borda: #334155;
+    --cor-erro: #fca5a5;
+    --cor-carregando: #93c5fd;
+    --cor-icone: #facc15;
+    --sombra-card: 0 16px 40px rgba(0, 0, 0, 0.35);
+    background:
+        radial-gradient(
+            circle at top left,
+            rgba(56, 189, 248, 0.16),
+            transparent 28rem
+        ),
+        var(--cor-fundo);
+}
+
+body.tema-escuro {
+    --cor-fundo: #101827;
+    --cor-card: #172033;
+    --cor-texto: #edf6ff;
+    --cor-texto-suave: #b9c6d8;
+    --cor-primaria: #38bdf8;
+    --cor-primaria-hover: #0ea5e9;
+    --cor-borda: #334155;
+    --cor-erro: #fca5a5;
+    --cor-carregando: #93c5fd;
+    --cor-icone: #facc15;
+    --sombra-card: 0 16px 40px rgba(0, 0, 0, 0.35);
+    background:
+        radial-gradient(
+            circle at top left,
+            rgba(56, 189, 248, 0.16),
+            transparent 28rem
+        ),
+        var(--cor-fundo);
+}
+
+.container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 20px 12px;
+}
+
+.card {
+    width: 100%;
+    max-width: 620px;
+    background-color: var(--cor-card);
+    padding: 32px;
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    box-shadow: var(--sombra-card);
+}
+
+.topo-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+h1 {
+    margin-bottom: 0;
+    color: var(--cor-primaria);
+}
+
+.botao-tema {
+    flex: 0 0 auto;
+    margin-top: 0;
+    padding: 9px 12px;
+    border: 1px solid var(--cor-borda);
+    background-color: transparent;
+    color: var(--cor-texto);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.botao-tema:hover {
+    background-color: rgba(56, 189, 248, 0.12);
+}
+
+.descricao {
+    text-align: center;
+    margin-bottom: 24px;
+    color: var(--cor-texto-suave);
+    line-height: 1.5;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+label {
+    font-weight: bold;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    background-color: var(--cor-card);
+    color: var(--cor-texto);
+    font-size: 16px;
+}
+
+input:focus {
+    outline: 2px solid #93c5fd;
+    border-color: var(--cor-primaria);
+}
+
+button {
+    padding: 12px;
+    margin-top: 6px;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--cor-primaria);
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition:
+        background-color 0.2s ease,
+        opacity 0.2s ease;
+}
+
+button:hover {
+    background-color: var(--cor-primaria-hover);
+}
+
+button:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+#mensagem {
+    margin-top: 20px;
+    min-height: 24px;
+    text-align: center;
+}
+
+#mensagem.erro {
+    color: var(--cor-erro);
+}
+
+#mensagem.carregando {
+    color: var(--cor-carregando);
+}
+
+.resultado {
+    display: none;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--cor-borda);
+}
+
+.resultado.ativo {
+    display: block;
+}
+
+.clima-resumo {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+#icone-clima {
+    flex: 0 0 72px;
+    width: 72px;
+    color: var(--cor-icone);
+    font-size: 64px;
+    line-height: 1;
+    text-align: center;
+}
+
+.resultado h2 {
+    margin-bottom: 6px;
+    font-size: 24px;
+    line-height: 1.2;
+}
+
+.descricao-clima {
+    color: var(--cor-texto-suave);
+    font-size: 17px;
+}
+
+.temperatura {
+    font-size: 42px;
+    font-weight: bold;
+    color: var(--cor-primaria);
+    line-height: 1;
+}
+
+.detalhes-clima {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.detalhes-clima p,
+.previsao-dia {
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    padding: 12px;
+    background-color: rgba(255, 255, 255, 0.48);
+}
+
+body.periodo-noite .detalhes-clima p,
+body.periodo-noite .previsao-dia,
+body.tema-escuro .detalhes-clima p,
+body.tema-escuro .previsao-dia {
+    background-color: rgba(15, 23, 42, 0.45);
+}
+
+.detalhes-clima span,
+.previsao-dia span {
+    display: block;
+    color: var(--cor-texto-suave);
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.detalhes-clima strong {
+    display: block;
+    margin-top: 4px;
+    font-size: 17px;
+}
+
+.data-consulta {
+    margin-top: 12px;
+    color: var(--cor-texto-suave);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.previsao {
+    margin-top: 24px;
+}
+
+.previsao h3 {
+    margin-bottom: 12px;
+    color: var(--cor-texto);
+    font-size: 18px;
+}
+
+.previsao-lista {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.previsao-dia {
+    min-height: 92px;
+}
+
+.previsao-dia strong {
+    display: block;
+    margin: 6px 0;
+    font-size: 15px;
+    line-height: 1.3;
+}
+
+.previsao-temperaturas {
+    color: var(--cor-texto);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.rodape-info {
+    width: 100%;
+    padding: 6px 20px 22px;
+    color: var(--cor-texto-suave);
+    font-size: 12px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.rodape-info p + p {
+    margin-top: 8px;
+}
+
+.rodape-info a {
+    color: var(--cor-primaria);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.rodape-info a:hover {
+    text-decoration: underline;
+}
+
+@media screen and (max-width: 600px) {
+    .container {
+        padding-inline: 14px;
+    }
+
+    .card {
+        padding: 24px 18px;
+    }
+
+    .topo-card {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
+
+    .clima-resumo {
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    #icone-clima {
+        flex-basis: 56px;
+        width: 56px;
+        font-size: 52px;
+    }
+
+    .resultado h2 {
+        font-size: 21px;
+    }
+
+    .temperatura {
+        font-size: 34px;
+    }
+
+    .detalhes-clima,
+    .previsao-lista {
+        grid-template-columns: 1fr;
+    }
+
+    .rodape-info {
+        padding-inline: 14px;
+    }
+}
