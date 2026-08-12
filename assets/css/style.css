@@ -4,11 +4,47 @@
     box-sizing: border-box;
 }
 
+:root {
+    --cor-fundo: #e8f4ff;
+    --cor-card: #ffffff;
+    --cor-texto: #1f2937;
+    --cor-texto-suave: #5b6472;
+    --cor-primaria: #2563eb;
+    --cor-primaria-hover: #1d4ed8;
+    --cor-borda: #d6e1ee;
+    --cor-erro: #b42318;
+    --cor-carregando: #1d4ed8;
+    --cor-icone: #f59e0b;
+    --sombra-card: 0 16px 40px rgba(31, 41, 55, 0.12);
+}
+
 body {
     font-family: Arial, Helvetica, sans-serif;
-    background-color: #eef6ff;
-    color: #1f2937;
+    background:
+        radial-gradient(circle at top left, rgba(125, 211, 252, 0.3), transparent 32rem),
+        var(--cor-fundo);
+    color: var(--cor-texto);
     min-height: 100vh;
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease;
+}
+
+body.periodo-noite {
+    --cor-fundo: #101827;
+    --cor-card: #172033;
+    --cor-texto: #edf6ff;
+    --cor-texto-suave: #b9c6d8;
+    --cor-primaria: #38bdf8;
+    --cor-primaria-hover: #0ea5e9;
+    --cor-borda: #334155;
+    --cor-erro: #fca5a5;
+    --cor-carregando: #93c5fd;
+    --cor-icone: #facc15;
+    --sombra-card: 0 16px 40px rgba(0, 0, 0, 0.35);
+    background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 28rem),
+        var(--cor-fundo);
 }
 
 .container {
@@ -22,22 +58,23 @@ body {
 .card {
     width: 100%;
     max-width: 500px;
-    background-color: #ffffff;
+    background-color: var(--cor-card);
     padding: 32px;
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    box-shadow: var(--sombra-card);
 }
 
 h1 {
     text-align: center;
     margin-bottom: 12px;
-    color: #2563eb;
+    color: var(--cor-primaria);
 }
 
 .descricao {
     text-align: center;
     margin-bottom: 24px;
-    color: #6b7280;
+    color: var(--cor-texto-suave);
     line-height: 1.5;
 }
 
@@ -54,14 +91,16 @@ label {
 input {
     width: 100%;
     padding: 12px;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--cor-borda);
     border-radius: 8px;
+    background-color: var(--cor-card);
+    color: var(--cor-texto);
     font-size: 16px;
 }
 
 input:focus {
     outline: 2px solid #93c5fd;
-    border-color: #2563eb;
+    border-color: var(--cor-primaria);
 }
 
 button {
@@ -69,43 +108,89 @@ button {
     margin-top: 6px;
     border: none;
     border-radius: 8px;
-    background-color: #2563eb;
+    background-color: var(--cor-primaria);
     color: #ffffff;
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
+    transition:
+        background-color 0.2s ease,
+        opacity 0.2s ease;
 }
 
 button:hover {
-    background-color: #1d4ed8;
+    background-color: var(--cor-primaria-hover);
+}
+
+button:disabled {
+    cursor: wait;
+    opacity: 0.7;
 }
 
 #mensagem {
     margin-top: 20px;
+    min-height: 24px;
     text-align: center;
+}
+
+#mensagem.erro {
+    color: var(--cor-erro);
+}
+
+#mensagem.carregando {
+    color: var(--cor-carregando);
 }
 
 .resultado {
     display: none;
     margin-top: 24px;
-    padding: 24px;
-    background-color: #eff6ff;
-    border-radius: 12px;
-    text-align: center;
+    padding-top: 24px;
+    border-top: 1px solid var(--cor-borda);
 }
 
 .resultado.ativo {
     display: block;
 }
 
+.clima-resumo {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+#icone-clima {
+    flex: 0 0 72px;
+    width: 72px;
+    color: var(--cor-icone);
+    font-size: 64px;
+    line-height: 1;
+    text-align: center;
+}
+
 .resultado h2 {
-    margin-bottom: 12px;
+    margin-bottom: 6px;
+    font-size: 24px;
+    line-height: 1.2;
+}
+
+.descricao-clima {
+    color: var(--cor-texto-suave);
+    font-size: 17px;
 }
 
 .temperatura {
-    font-size: 40px;
+    font-size: 42px;
     font-weight: bold;
-    color: #2563eb;
+    color: var(--cor-primaria);
+    line-height: 1;
+}
+
+.data-consulta {
+    margin-top: 12px;
+    color: var(--cor-texto-suave);
+    font-size: 14px;
+    line-height: 1.5;
 }
 
 @media screen and (max-width: 600px) {
@@ -115,6 +200,21 @@ button:hover {
 
     h1 {
         font-size: 24px;
+    }
+
+    .clima-resumo {
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    #icone-clima {
+        flex-basis: 56px;
+        width: 56px;
+        font-size: 52px;
+    }
+
+    .resultado h2 {
+        font-size: 21px;
     }
 
     .temperatura {

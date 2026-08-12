@@ -11,13 +11,17 @@
 
         <title>Previsão do Tempo</title>
 
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.12/css/weather-icons.min.css"
+        />
         <link rel="stylesheet" href="./assets/css/style.css" />
     </head>
 
-    <body>
+    <body class="periodo-dia">
         <main class="container">
-            <section class="card">
-                <h1>🌤️ Previsão do Tempo</h1>
+            <section class="card" aria-labelledby="titulo-app">
+                <h1 id="titulo-app">Previsão do Tempo</h1>
 
                 <p class="descricao">
                     Digite o nome de uma cidade para consultar a temperatura
@@ -32,20 +36,30 @@
                         id="cidade"
                         name="cidade"
                         placeholder="Ex: São Paulo"
+                        autocomplete="address-level2"
                         required
                     />
 
                     <button type="submit">Buscar clima</button>
                 </form>
 
-                <p id="mensagem"></p>
+                <p id="mensagem" role="status" aria-live="polite"></p>
 
-                <section id="resultado" class="resultado">
-                    <h2 id="nome-cidade"></h2>
+                <section id="resultado" class="resultado" aria-live="polite">
+                    <div class="clima-resumo">
+                        <i id="icone-clima" class="wi wi-na" aria-hidden="true"></i>
+
+                        <div>
+                            <h2 id="nome-cidade"></h2>
+                            <p id="descricao-clima" class="descricao-clima"></p>
+                        </div>
+                    </div>
 
                     <p class="temperatura">
                         <span id="temperatura"></span>
                     </p>
+
+                    <p id="data-consulta" class="data-consulta"></p>
                 </section>
             </section>
         </main>
