@@ -21,7 +21,11 @@
 body {
     font-family: Arial, Helvetica, sans-serif;
     background:
-        radial-gradient(circle at top left, rgba(125, 211, 252, 0.3), transparent 32rem),
+        radial-gradient(
+            circle at top left,
+            rgba(125, 211, 252, 0.3),
+            transparent 32rem
+        ),
         var(--cor-fundo);
     color: var(--cor-texto);
     min-height: 100vh;
@@ -43,7 +47,11 @@ body.periodo-noite {
     --cor-icone: #facc15;
     --sombra-card: 0 16px 40px rgba(0, 0, 0, 0.35);
     background:
-        radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 28rem),
+        radial-gradient(
+            circle at top left,
+            rgba(56, 189, 248, 0.16),
+            transparent 28rem
+        ),
         var(--cor-fundo);
 }
 

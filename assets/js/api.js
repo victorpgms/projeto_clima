@@ -1,14 +1,20 @@
-const formClima = document.querySelector("#form-clima");
-const inputCidade = document.querySelector("#cidade");
-const mensagem = document.querySelector("#mensagem");
-const botaoBuscar = formClima.querySelector("button[type='submit']");
+const temDOM = typeof document !== "undefined";
 
-const resultado = document.querySelector("#resultado");
-const nomeCidade = document.querySelector("#nome-cidade");
-const temperatura = document.querySelector("#temperatura");
-const descricaoClima = document.querySelector("#descricao-clima");
-const iconeClima = document.querySelector("#icone-clima");
-const dataConsulta = document.querySelector("#data-consulta");
+const formClima = temDOM ? document.querySelector("#form-clima") : null;
+const inputCidade = temDOM ? document.querySelector("#cidade") : null;
+const mensagem = temDOM ? document.querySelector("#mensagem") : null;
+
+const botaoBuscar = formClima?.querySelector("button[type='submit']") ?? null;
+
+const resultado = temDOM ? document.querySelector("#resultado") : null;
+const nomeCidade = temDOM ? document.querySelector("#nome-cidade") : null;
+const temperatura = temDOM ? document.querySelector("#temperatura") : null;
+const descricaoClima = temDOM
+    ? document.querySelector("#descricao-clima")
+    : null;
+
+const iconeClima = temDOM ? document.querySelector("#icone-clima") : null;
+const dataConsulta = temDOM ? document.querySelector("#data-consulta") : null;
 
 const CLIMA_POR_CODIGO = {
     0: {
@@ -156,37 +162,50 @@ const CLIMA_POR_CODIGO = {
 class CidadeNaoEncontradaError extends Error {}
 class FalhaApiError extends Error {}
 class ErroRede extends Error {}
+class EntradaInvalidaError extends Error {}
 
-formClima.addEventListener("submit", async function (event) {
-    event.preventDefault();
+if (formClima) {
+    formClima.addEventListener("submit", async function (event) {
+        event.preventDefault();
 
-    const cidade = inputCidade.value.trim();
+        const cidade = inputCidade.value.trim();
 
-    if (!cidade) {
-        mostrarMensagem("Digite o nome de uma cidade.", "erro");
-        esconderResultado();
-        return;
-    }
+        if (!cidade) {
+            mostrarMensagem("Digite o nome de uma cidade.", "erro");
 
-    iniciarBusca();
+            esconderResultado();
+            return;
+        }
 
-    try {
-        const local = await buscarLocalizacao(cidade);
-        const dadosClima = await buscarClimaAtual(local.latitude, local.longitude);
+        iniciarBusca();
 
-        exibirResultado(local, dadosClima);
-    } catch (erro) {
-        tratarErro(erro);
-    } finally {
-        finalizarBusca();
-    }
-});
+        try {
+            const local = await buscarLocalizacao(cidade);
 
+            const dadosClima = await buscarClimaAtual(
+                local.latitude,
+                local.longitude,
+            );
+
+            exibirResultado(local, dadosClima);
+        } catch (erro) {
+            tratarErro(erro);
+        } finally {
+            finalizarBusca();
+        }
+    });
+}
 async function buscarLocalizacao(cidade) {
+    const cidadeTratada = typeof cidade === "string" ? cidade.trim() : "";
+
+    if (!cidadeTratada) {
+        throw new EntradaInvalidaError("Digite o nome de uma cidade.");
+    }
+
     const url = new URL("https://geocoding-api.open-meteo.com/v1/search");
 
     url.search = new URLSearchParams({
-        name: cidade,
+        name: cidadeTratada,
         count: "1",
         language: "pt",
         format: "json",
@@ -194,7 +213,7 @@ async function buscarLocalizacao(cidade) {
 
     const dados = await buscarJson(
         url,
-        "A API de geocodificação falhou. Tente novamente em alguns instantes."
+        "A API de geocodificação falhou. Tente novamente em alguns instantes.",
     );
 
     if (!Array.isArray(dados.results) || dados.results.length === 0) {
@@ -217,7 +236,7 @@ async function buscarClimaAtual(latitude, longitude) {
 
     const dados = await buscarJson(
         url,
-        "A API de clima falhou. Tente novamente em alguns instantes."
+        "A API de clima falhou. Tente novamente em alguns instantes.",
     );
 
     if (!dados.current || typeof dados.current.temperature_2m !== "number") {
@@ -235,7 +254,11 @@ async function buscarJson(url, mensagemErroApi) {
     } catch {
         throw new ErroRede();
     }
-
+    if (resposta.status === 429) {
+        throw new FalhaApiError(
+            "Limite de requisições da API excedido. Tente novamente mais tarde.",
+        );
+    }
     if (!resposta.ok) {
         throw new FalhaApiError(mensagemErroApi);
     }
@@ -255,7 +278,7 @@ function exibirResultado(local, dadosClima) {
 
     nomeCidade.textContent = formatarNomeCidade(local);
     temperatura.textContent = `${formatarTemperatura(
-        climaAtual.temperature_2m
+        climaAtual.temperature_2m,
     )}${unidade}`;
     descricaoClima.textContent = clima.descricao;
     dataConsulta.textContent = `Consulta: ${formatarDataHora(climaAtual.time)}`;
@@ -298,7 +321,7 @@ function formatarTemperatura(valor) {
 
 function formatarDataHora(dataHoraApi) {
     const partes = dataHoraApi?.match(
-        /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/
+        /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/,
     );
 
     if (!partes) {
@@ -348,21 +371,33 @@ function tratarErro(erro) {
     if (erro instanceof CidadeNaoEncontradaError) {
         mostrarMensagem(
             "Cidade não encontrada. Confira o nome e tente novamente.",
-            "erro"
+            "erro",
         );
     } else if (erro instanceof ErroRede) {
         mostrarMensagem(
             "Erro de rede. Verifique sua conexão e tente novamente.",
-            "erro"
+            "erro",
         );
     } else if (erro instanceof FalhaApiError) {
         mostrarMensagem(erro.message, "erro");
     } else {
         mostrarMensagem(
             "Não foi possível consultar a previsão do tempo.",
-            "erro"
+            "erro",
         );
     }
 
     esconderResultado();
+}
+
+if (typeof module !== "undefined" && module.exports) {
+    module.exports = {
+        buscarLocalizacao,
+        buscarClimaAtual,
+        buscarJson,
+        CidadeNaoEncontradaError,
+        FalhaApiError,
+        ErroRede,
+        EntradaInvalidaError,
+    };
 }
