@@ -21,7 +21,18 @@
     <body class="periodo-dia">
         <main class="container">
             <section class="card" aria-labelledby="titulo-app">
-                <h1 id="titulo-app">Previsão do Tempo</h1>
+                <div class="topo-card">
+                    <h1 id="titulo-app">Previsão do Tempo</h1>
+
+                    <button
+                        type="button"
+                        id="botao-tema"
+                        class="botao-tema"
+                        aria-pressed="false"
+                    >
+                        Tema escuro
+                    </button>
+                </div>
 
                 <p class="descricao">
                     Digite o nome de uma cidade para consultar a temperatura
@@ -63,7 +74,29 @@
                         <span id="temperatura"></span>
                     </p>
 
+                    <div class="detalhes-clima" aria-label="Detalhes do clima atual">
+                        <p>
+                            <span>Umidade</span>
+                            <strong id="umidade-atual"></strong>
+                        </p>
+
+                        <p>
+                            <span>Vento</span>
+                            <strong id="vento-atual"></strong>
+                        </p>
+
+                        <p>
+                            <span>Precipitação</span>
+                            <strong id="precipitacao-atual"></strong>
+                        </p>
+                    </div>
+
                     <p id="data-consulta" class="data-consulta"></p>
+
+                    <section class="previsao" aria-labelledby="titulo-previsao">
+                        <h3 id="titulo-previsao">Próximos 5 dias</h3>
+                        <div id="previsao-lista" class="previsao-lista"></div>
+                    </section>
                 </section>
             </section>
         </main>

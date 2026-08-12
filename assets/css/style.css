@@ -55,6 +55,27 @@ body.periodo-noite {
         var(--cor-fundo);
 }
 
+body.tema-escuro {
+    --cor-fundo: #101827;
+    --cor-card: #172033;
+    --cor-texto: #edf6ff;
+    --cor-texto-suave: #b9c6d8;
+    --cor-primaria: #38bdf8;
+    --cor-primaria-hover: #0ea5e9;
+    --cor-borda: #334155;
+    --cor-erro: #fca5a5;
+    --cor-carregando: #93c5fd;
+    --cor-icone: #facc15;
+    --sombra-card: 0 16px 40px rgba(0, 0, 0, 0.35);
+    background:
+        radial-gradient(
+            circle at top left,
+            rgba(56, 189, 248, 0.16),
+            transparent 28rem
+        ),
+        var(--cor-fundo);
+}
+
 .container {
     min-height: 100vh;
     display: flex;
@@ -65,7 +86,7 @@ body.periodo-noite {
 
 .card {
     width: 100%;
-    max-width: 500px;
+    max-width: 620px;
     background-color: var(--cor-card);
     padding: 32px;
     border: 1px solid var(--cor-borda);
@@ -73,10 +94,32 @@ body.periodo-noite {
     box-shadow: var(--sombra-card);
 }
 
-h1 {
-    text-align: center;
+.topo-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
     margin-bottom: 12px;
+}
+
+h1 {
+    margin-bottom: 0;
     color: var(--cor-primaria);
+}
+
+.botao-tema {
+    flex: 0 0 auto;
+    margin-top: 0;
+    padding: 9px 12px;
+    border: 1px solid var(--cor-borda);
+    background-color: transparent;
+    color: var(--cor-texto);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.botao-tema:hover {
+    background-color: rgba(56, 189, 248, 0.12);
 }
 
 .descricao {
@@ -194,6 +237,42 @@ button:disabled {
     line-height: 1;
 }
 
+.detalhes-clima {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.detalhes-clima p,
+.previsao-dia {
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    padding: 12px;
+    background-color: rgba(255, 255, 255, 0.48);
+}
+
+body.periodo-noite .detalhes-clima p,
+body.periodo-noite .previsao-dia,
+body.tema-escuro .detalhes-clima p,
+body.tema-escuro .previsao-dia {
+    background-color: rgba(15, 23, 42, 0.45);
+}
+
+.detalhes-clima span,
+.previsao-dia span {
+    display: block;
+    color: var(--cor-texto-suave);
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.detalhes-clima strong {
+    display: block;
+    margin-top: 4px;
+    font-size: 17px;
+}
+
 .data-consulta {
     margin-top: 12px;
     color: var(--cor-texto-suave);
@@ -201,9 +280,47 @@ button:disabled {
     line-height: 1.5;
 }
 
+.previsao {
+    margin-top: 24px;
+}
+
+.previsao h3 {
+    margin-bottom: 12px;
+    color: var(--cor-texto);
+    font-size: 18px;
+}
+
+.previsao-lista {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.previsao-dia {
+    min-height: 92px;
+}
+
+.previsao-dia strong {
+    display: block;
+    margin: 6px 0;
+    font-size: 15px;
+    line-height: 1.3;
+}
+
+.previsao-temperaturas {
+    color: var(--cor-texto);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
 @media screen and (max-width: 600px) {
     .card {
         padding: 24px 18px;
+    }
+
+    .topo-card {
+        align-items: flex-start;
+        flex-direction: column;
     }
 
     h1 {
@@ -227,5 +344,10 @@ button:disabled {
 
     .temperatura {
         font-size: 34px;
+    }
+
+    .detalhes-clima,
+    .previsao-lista {
+        grid-template-columns: 1fr;
     }
 }

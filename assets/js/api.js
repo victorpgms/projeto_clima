@@ -1,7 +1,8 @@
 /**
  * @fileoverview Integra a interface de previsão do tempo com as APIs da
- * Open-Meteo para buscar coordenadas, clima atual, descrição textual,
- * ícone representativo e data/hora da consulta.
+ * Open-Meteo para buscar coordenadas, clima atual, umidade, vento,
+ * precipitação, previsão de 5 dias, ícone representativo e data/hora
+ * da consulta.
  *
  * @example
  * buscarLocalizacao("São Paulo")
@@ -27,6 +28,15 @@ const descricaoClima = temDOM
 
 const iconeClima = temDOM ? document.querySelector("#icone-clima") : null;
 const dataConsulta = temDOM ? document.querySelector("#data-consulta") : null;
+const botaoTema = temDOM ? document.querySelector("#botao-tema") : null;
+const umidadeAtual = temDOM ? document.querySelector("#umidade-atual") : null;
+const ventoAtual = temDOM ? document.querySelector("#vento-atual") : null;
+const precipitacaoAtual = temDOM
+    ? document.querySelector("#precipitacao-atual")
+    : null;
+const previsaoLista = temDOM ? document.querySelector("#previsao-lista") : null;
+
+const CLASSE_TEMA_ESCURO = "tema-escuro";
 
 const FORMATADOR_DATA = new Intl.DateTimeFormat("pt-BR", {
     weekday: "long",
@@ -38,6 +48,12 @@ const FORMATADOR_DATA = new Intl.DateTimeFormat("pt-BR", {
 const FORMATADOR_HORA = new Intl.DateTimeFormat("pt-BR", {
     hour: "2-digit",
     minute: "2-digit",
+});
+
+const FORMATADOR_DIA_CURTO = new Intl.DateTimeFormat("pt-BR", {
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
 });
 
 const CLIMA_POR_CODIGO = {
@@ -246,6 +262,11 @@ if (formClima) {
     });
 }
 
+if (botaoTema) {
+    botaoTema.addEventListener("click", alternarTemaEscuro);
+    atualizarBotaoTema();
+}
+
 /**
  * Busca latitude, longitude e metadados de uma cidade pela API de
  * Geocodificação da Open-Meteo.
@@ -296,7 +317,8 @@ async function buscarLocalizacao(cidade) {
  * @param {number|string} latitude - Latitude do local consultado.
  * @param {number|string} longitude - Longitude do local consultado.
  * @returns {Promise<Object>} Resposta da API Forecast da Open-Meteo com
- * `current.temperature_2m`, `current.weather_code`, `current.is_day` e unidades.
+ * clima atual, umidade, vento, precipitação, previsão diária de 5 dias e
+ * unidades de medida.
  * @throws {EntradaInvalidaError} Quando latitude ou longitude não são números.
  * @throws {FalhaApiError} Quando a API falha, retorna JSON inválido ou dados
  * climáticos incompletos.
@@ -321,8 +343,13 @@ async function buscarClimaAtual(latitude, longitude) {
     url.search = new URLSearchParams({
         latitude: String(latitudeNumerica),
         longitude: String(longitudeNumerica),
-        current: "temperature_2m,weather_code,is_day",
+        current:
+            "temperature_2m,weather_code,is_day,relative_humidity_2m,wind_speed_10m,precipitation",
+        daily: "temperature_2m_max,temperature_2m_min",
+        forecast_days: "5",
         temperature_unit: "celsius",
+        wind_speed_unit: "kmh",
+        precipitation_unit: "mm",
         timezone: "auto",
     });
 
@@ -331,11 +358,59 @@ async function buscarClimaAtual(latitude, longitude) {
         "A API de clima falhou. Tente novamente em alguns instantes.",
     );
 
-    if (!dados.current || typeof dados.current.temperature_2m !== "number") {
+    if (!dados.current || !dados.daily) {
         throw new FalhaApiError("A API retornou dados climáticos incompletos.");
     }
 
+    validarClimaAtual(dados.current);
+    validarPrevisaoDiaria(dados.daily);
+
     return dados;
+}
+
+function validarClimaAtual(climaAtual) {
+    const camposNumericos = [
+        "temperature_2m",
+        "weather_code",
+        "is_day",
+        "relative_humidity_2m",
+        "wind_speed_10m",
+        "precipitation",
+    ];
+
+    const temCampoInvalido = camposNumericos.some(
+        (campo) => typeof climaAtual[campo] !== "number",
+    );
+
+    if (temCampoInvalido) {
+        throw new FalhaApiError("A API retornou dados climáticos incompletos.");
+    }
+}
+
+function validarPrevisaoDiaria(previsaoDiaria) {
+    const temDadosDiarios =
+        Array.isArray(previsaoDiaria.time) &&
+        Array.isArray(previsaoDiaria.temperature_2m_max) &&
+        Array.isArray(previsaoDiaria.temperature_2m_min);
+
+    const temCincoDias =
+        temDadosDiarios &&
+        previsaoDiaria.time.length >= 5 &&
+        previsaoDiaria.temperature_2m_max.length >= 5 &&
+        previsaoDiaria.temperature_2m_min.length >= 5;
+
+    const temperaturasSaoNumericas =
+        temCincoDias &&
+        previsaoDiaria.temperature_2m_max
+            .slice(0, 5)
+            .every((temperatura) => typeof temperatura === "number") &&
+        previsaoDiaria.temperature_2m_min
+            .slice(0, 5)
+            .every((temperatura) => typeof temperatura === "number");
+
+    if (!temperaturasSaoNumericas) {
+        throw new FalhaApiError("A API retornou dados de previsão incompletos.");
+    }
 }
 
 /**
@@ -382,14 +457,27 @@ function exibirResultado(local, dadosClima) {
     const climaAtual = dadosClima.current;
     const ehDia = climaAtual.is_day === 1;
     const clima = obterClima(climaAtual.weather_code, ehDia);
-    const unidade = dadosClima.current_units?.temperature_2m ?? "°C";
+    const unidadesAtuais = dadosClima.current_units ?? {};
+    const unidadeTemperatura = unidadesAtuais.temperature_2m ?? "°C";
 
     nomeCidade.textContent = formatarNomeCidade(local);
     temperatura.textContent = `${formatarTemperatura(
         climaAtual.temperature_2m,
-    )}${unidade}`;
+    )}${unidadeTemperatura}`;
     descricaoClima.textContent = clima.descricao;
     dataConsulta.textContent = `Consulta: ${formatarDataHora(climaAtual.time)}`;
+    umidadeAtual.textContent = formatarMedida(
+        climaAtual.relative_humidity_2m,
+        unidadesAtuais.relative_humidity_2m ?? "%",
+    );
+    ventoAtual.textContent = formatarMedida(
+        climaAtual.wind_speed_10m,
+        unidadesAtuais.wind_speed_10m ?? "km/h",
+    );
+    precipitacaoAtual.textContent = formatarMedida(
+        climaAtual.precipitation,
+        unidadesAtuais.precipitation ?? "mm",
+    );
 
     iconeClima.className = `wi ${clima.icone}`;
     iconeClima.setAttribute("title", clima.descricao);
@@ -398,6 +486,7 @@ function exibirResultado(local, dadosClima) {
     document.body.classList.toggle("periodo-noite", !ehDia);
 
     mostrarMensagem("", "");
+    renderizarPrevisao(dadosClima.daily, dadosClima.daily_units);
     resultado.classList.add("ativo");
 }
 
@@ -427,6 +516,14 @@ function formatarTemperatura(valor) {
     });
 }
 
+function formatarMedida(valor, unidade) {
+    const valorFormatado = formatarTemperatura(valor);
+
+    return unidade === "%"
+        ? `${valorFormatado}${unidade}`
+        : `${valorFormatado} ${unidade}`;
+}
+
 function formatarDataHora(dataHoraApi) {
     const partes = dataHoraApi?.match(
         /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/,
@@ -440,6 +537,75 @@ function formatarDataHora(dataHoraApi) {
     const data = new Date(ano, Number(mes) - 1, dia, hora, minuto);
 
     return `${FORMATADOR_DATA.format(data)} às ${FORMATADOR_HORA.format(data)}`;
+}
+
+function formatarDataCurta(dataApi) {
+    const partes = dataApi?.match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+    if (!partes) {
+        return "Data não informada";
+    }
+
+    const [, ano, mes, dia] = partes;
+    const data = new Date(ano, Number(mes) - 1, dia);
+
+    return FORMATADOR_DIA_CURTO.format(data);
+}
+
+function obterPrevisaoDiaria(previsaoDiaria) {
+    return previsaoDiaria.time.slice(0, 5).map((data, indice) => ({
+        data,
+        maxima: previsaoDiaria.temperature_2m_max[indice],
+        minima: previsaoDiaria.temperature_2m_min[indice],
+    }));
+}
+
+function renderizarPrevisao(previsaoDiaria, unidadesDiarias = {}) {
+    if (!previsaoLista) {
+        return;
+    }
+
+    const unidadeMaxima = unidadesDiarias.temperature_2m_max ?? "°C";
+    const unidadeMinima = unidadesDiarias.temperature_2m_min ?? unidadeMaxima;
+    const previsoes = obterPrevisaoDiaria(previsaoDiaria);
+
+    previsaoLista.innerHTML = previsoes
+        .map(
+            (previsao) => `
+                <article class="previsao-dia">
+                    <span>${formatarDataCurta(previsao.data)}</span>
+                    <p class="previsao-temperaturas">
+                        <strong>Máx: ${formatarMedida(
+                            previsao.maxima,
+                            unidadeMaxima,
+                        )}</strong>
+                        <strong>Mín: ${formatarMedida(
+                            previsao.minima,
+                            unidadeMinima,
+                        )}</strong>
+                    </p>
+                </article>
+            `,
+        )
+        .join("");
+}
+
+function alternarTemaEscuro() {
+    const temaEscuroAtivo = !document.body.classList.contains(CLASSE_TEMA_ESCURO);
+
+    document.body.classList.toggle(CLASSE_TEMA_ESCURO, temaEscuroAtivo);
+    atualizarBotaoTema(temaEscuroAtivo);
+}
+
+function atualizarBotaoTema(
+    temaEscuroAtivo = document.body.classList.contains(CLASSE_TEMA_ESCURO),
+) {
+    if (!botaoTema) {
+        return;
+    }
+
+    botaoTema.textContent = temaEscuroAtivo ? "Tema claro" : "Tema escuro";
+    botaoTema.setAttribute("aria-pressed", String(temaEscuroAtivo));
 }
 
 function iniciarBusca() {
@@ -507,7 +673,10 @@ if (typeof module !== "undefined" && module.exports) {
         obterClima,
         formatarNomeCidade,
         formatarTemperatura,
+        formatarMedida,
         formatarDataHora,
+        formatarDataCurta,
+        obterPrevisaoDiaria,
         CidadeNaoEncontradaError,
         FalhaApiError,
         ErroRede,

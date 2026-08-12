@@ -5,7 +5,10 @@ const {
     obterClima,
     formatarNomeCidade,
     formatarTemperatura,
+    formatarMedida,
     formatarDataHora,
+    formatarDataCurta,
+    obterPrevisaoDiaria,
     CidadeNaoEncontradaError,
     FalhaApiError,
     ErroRede,
@@ -28,6 +31,45 @@ function criarRespostaJsonInvalido() {
     };
 }
 
+function criarClimaCompleto(sobrescritas = {}) {
+    return {
+        current: {
+            time: "2026-08-12T11:00",
+            temperature_2m: 25.4,
+            weather_code: 1,
+            is_day: 1,
+            relative_humidity_2m: 68,
+            wind_speed_10m: 12.7,
+            precipitation: 0.4,
+            ...sobrescritas.current,
+        },
+        current_units: {
+            temperature_2m: "°C",
+            relative_humidity_2m: "%",
+            wind_speed_10m: "km/h",
+            precipitation: "mm",
+            ...sobrescritas.current_units,
+        },
+        daily: {
+            time: [
+                "2026-08-12",
+                "2026-08-13",
+                "2026-08-14",
+                "2026-08-15",
+                "2026-08-16",
+            ],
+            temperature_2m_max: [26, 27.4, 24.8, 25.1, 28],
+            temperature_2m_min: [16.2, 17, 15.6, 18.2, 19],
+            ...sobrescritas.daily,
+        },
+        daily_units: {
+            temperature_2m_max: "°C",
+            temperature_2m_min: "°C",
+            ...sobrescritas.daily_units,
+        },
+    };
+}
+
 function criarClassList(classesIniciais = []) {
     const classes = new Set(classesIniciais);
 
@@ -39,7 +81,13 @@ function criarClassList(classesIniciais = []) {
             classes.delete(classe);
         },
         toggle(classe, ativo) {
-            if (ativo) {
+            if (ativo === undefined) {
+                if (classes.has(classe)) {
+                    classes.delete(classe);
+                } else {
+                    classes.add(classe);
+                }
+            } else if (ativo) {
                 classes.add(classe);
             } else {
                 classes.delete(classe);
@@ -80,15 +128,23 @@ function carregarModuloComDOM(fetchMock) {
         descricaoClima: criarElemento("descricao-clima"),
         iconeClima: criarElemento("icone-clima"),
         dataConsulta: criarElemento("data-consulta"),
+        umidadeAtual: criarElemento("umidade-atual"),
+        ventoAtual: criarElemento("vento-atual"),
+        precipitacaoAtual: criarElemento("precipitacao-atual"),
+        previsaoLista: criarElemento("previsao-lista"),
         botaoBuscar: criarElemento("buscar"),
+        botaoTema: criarElemento("botao-tema"),
         body: criarElemento("body"),
     };
 
     elementos.body.classList = criarClassList(["periodo-dia"]);
     elementos.form.addEventListener = (evento, callback) => {
-        eventos[evento] = callback;
+        eventos[`form:${evento}`] = callback;
     };
     elementos.form.querySelector = () => elementos.botaoBuscar;
+    elementos.botaoTema.addEventListener = (evento, callback) => {
+        eventos[`tema:${evento}`] = callback;
+    };
 
     global.fetch = fetchMock;
     global.document = {
@@ -104,6 +160,11 @@ function carregarModuloComDOM(fetchMock) {
                 "#descricao-clima": elementos.descricaoClima,
                 "#icone-clima": elementos.iconeClima,
                 "#data-consulta": elementos.dataConsulta,
+                "#botao-tema": elementos.botaoTema,
+                "#umidade-atual": elementos.umidadeAtual,
+                "#vento-atual": elementos.ventoAtual,
+                "#precipitacao-atual": elementos.precipitacaoAtual,
+                "#previsao-lista": elementos.previsaoLista,
             };
 
             return seletores[seletor];
@@ -114,7 +175,8 @@ function carregarModuloComDOM(fetchMock) {
 
     return {
         elementos,
-        submit: () => eventos.submit({ preventDefault: jest.fn() }),
+        submit: () => eventos["form:submit"]({ preventDefault: jest.fn() }),
+        clickTema: () => eventos["tema:click"](),
     };
 }
 
@@ -178,31 +240,28 @@ describe("API de previsão do tempo", () => {
     );
 
     test("busca clima atual com coordenadas válidas", async () => {
-        global.fetch.mockResolvedValueOnce(
-            criarRespostaJson({
-                current: {
-                    temperature_2m: 25.4,
-                    weather_code: 1,
-                    is_day: 1,
-                    time: "2026-08-12T11:00",
-                },
-                current_units: {
-                    temperature_2m: "°C",
-                },
-            }),
-        );
+        global.fetch.mockResolvedValueOnce(criarRespostaJson(criarClimaCompleto()));
 
         const clima = await buscarClimaAtual("-23.55", "-46.63");
         const url = global.fetch.mock.calls[0][0];
 
         expect(clima.current.temperature_2m).toBe(25.4);
         expect(clima.current.weather_code).toBe(1);
+        expect(clima.current.relative_humidity_2m).toBe(68);
+        expect(clima.current.wind_speed_10m).toBe(12.7);
+        expect(clima.daily.temperature_2m_max).toHaveLength(5);
         expect(url.searchParams.get("latitude")).toBe("-23.55");
         expect(url.searchParams.get("longitude")).toBe("-46.63");
         expect(url.searchParams.get("current")).toBe(
-            "temperature_2m,weather_code,is_day",
+            "temperature_2m,weather_code,is_day,relative_humidity_2m,wind_speed_10m,precipitation",
         );
+        expect(url.searchParams.get("daily")).toBe(
+            "temperature_2m_max,temperature_2m_min",
+        );
+        expect(url.searchParams.get("forecast_days")).toBe("5");
         expect(url.searchParams.get("temperature_unit")).toBe("celsius");
+        expect(url.searchParams.get("wind_speed_unit")).toBe("kmh");
+        expect(url.searchParams.get("precipitation_unit")).toBe("mm");
     });
 
     test.each([
@@ -273,6 +332,24 @@ describe("API de previsão do tempo", () => {
         );
     });
 
+    test("trata previsão diária incompleta", async () => {
+        global.fetch.mockResolvedValueOnce(
+            criarRespostaJson(
+                criarClimaCompleto({
+                    daily: {
+                        time: ["2026-08-12"],
+                        temperature_2m_max: [26],
+                        temperature_2m_min: [16],
+                    },
+                }),
+            ),
+        );
+
+        await expect(buscarClimaAtual(-23.55, -46.63)).rejects.toThrow(
+            "A API retornou dados de previsão incompletos.",
+        );
+    });
+
     test("mapeia descrição e ícone do clima para dia, noite e código desconhecido", () => {
         expect(obterClima(0, true)).toEqual({
             descricao: "Céu limpo",
@@ -297,10 +374,44 @@ describe("API de previsão do tempo", () => {
             }),
         ).toBe("Recife - Pernambuco, Brasil");
         expect(formatarTemperatura(18.35)).toBe("18,4");
+        expect(formatarMedida(68, "%")).toBe("68%");
+        expect(formatarMedida(12.7, "km/h")).toBe("12,7 km/h");
         expect(formatarDataHora("2025-10-13T14:30")).toContain(
             "segunda-feira, 13 de outubro de 2025",
         );
+        expect(formatarDataCurta("2025-10-13")).toContain("13/10");
         expect(formatarDataHora(null)).toBe("data e hora não informadas");
+    });
+
+    test("limita a previsão diária aos próximos 5 dias", () => {
+        const previsao = obterPrevisaoDiaria(
+            criarClimaCompleto({
+                daily: {
+                    time: [
+                        "2026-08-12",
+                        "2026-08-13",
+                        "2026-08-14",
+                        "2026-08-15",
+                        "2026-08-16",
+                        "2026-08-17",
+                    ],
+                    temperature_2m_max: [26, 27, 28, 29, 30, 31],
+                    temperature_2m_min: [16, 17, 18, 19, 20, 21],
+                },
+            }).daily,
+        );
+
+        expect(previsao).toHaveLength(5);
+        expect(previsao[0]).toEqual({
+            data: "2026-08-12",
+            maxima: 26,
+            minima: 16,
+        });
+        expect(previsao[4]).toEqual({
+            data: "2026-08-16",
+            maxima: 30,
+            minima: 20,
+        });
     });
 
     test("renderiza resultado na tela após envio válido do formulário", async () => {
@@ -320,17 +431,30 @@ describe("API de previsão do tempo", () => {
                 }),
             )
             .mockResolvedValueOnce(
-                criarRespostaJson({
-                    current: {
-                        temperature_2m: 26.2,
-                        weather_code: 2,
-                        is_day: 0,
-                        time: "2025-10-13T21:15",
-                    },
-                    current_units: {
-                        temperature_2m: "°C",
-                    },
-                }),
+                criarRespostaJson(
+                    criarClimaCompleto({
+                        current: {
+                            temperature_2m: 26.2,
+                            weather_code: 2,
+                            is_day: 0,
+                            time: "2025-10-13T21:15",
+                            relative_humidity_2m: 74,
+                            wind_speed_10m: 18.6,
+                            precipitation: 1.2,
+                        },
+                        daily: {
+                            time: [
+                                "2025-10-13",
+                                "2025-10-14",
+                                "2025-10-15",
+                                "2025-10-16",
+                                "2025-10-17",
+                            ],
+                            temperature_2m_max: [30, 29.5, 28, 31, 27.4],
+                            temperature_2m_min: [22, 21.5, 20, 23, 19.2],
+                        },
+                    }),
+                ),
             );
 
         const { elementos, submit } = carregarModuloComDOM(fetchMock);
@@ -346,6 +470,11 @@ describe("API de previsão do tempo", () => {
         expect(elementos.descricaoClima.textContent).toBe(
             "Parcialmente nublado",
         );
+        expect(elementos.umidadeAtual.textContent).toBe("74%");
+        expect(elementos.ventoAtual.textContent).toBe("18,6 km/h");
+        expect(elementos.precipitacaoAtual.textContent).toBe("1,2 mm");
+        expect(elementos.previsaoLista.innerHTML).toContain("Máx: 30 °C");
+        expect(elementos.previsaoLista.innerHTML).toContain("Mín: 19,2 °C");
         expect(elementos.iconeClima.className).toBe("wi wi-night-alt-cloudy");
         expect(elementos.resultado.classList.contains("ativo")).toBe(true);
         expect(elementos.body.classList.contains("periodo-noite")).toBe(true);
@@ -398,5 +527,25 @@ describe("API de previsão do tempo", () => {
         );
         expect(elementos.mensagem.className).toBe("erro");
         expect(elementos.resultado.classList.contains("ativo")).toBe(false);
+    });
+
+    test("alterna o tema escuro pelo botão da interface", () => {
+        const fetchMock = jest.fn();
+        const { elementos, clickTema } = carregarModuloComDOM(fetchMock);
+
+        expect(elementos.botaoTema.textContent).toBe("Tema escuro");
+        expect(elementos.botaoTema.atributos["aria-pressed"]).toBe("false");
+
+        clickTema();
+
+        expect(elementos.body.classList.contains("tema-escuro")).toBe(true);
+        expect(elementos.botaoTema.textContent).toBe("Tema claro");
+        expect(elementos.botaoTema.atributos["aria-pressed"]).toBe("true");
+
+        clickTema();
+
+        expect(elementos.body.classList.contains("tema-escuro")).toBe(false);
+        expect(elementos.botaoTema.textContent).toBe("Tema escuro");
+        expect(elementos.botaoTema.atributos["aria-pressed"]).toBe("false");
     });
 });
