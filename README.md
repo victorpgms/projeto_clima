@@ -1,163 +1,154 @@
-# Projeto Clima
+Projeto Clima
 
-Aplicação web estática para consultar o clima atual e a previsão dos próximos 5 dias a partir do nome de uma cidade. O projeto usa HTML, CSS e JavaScript no navegador, consome as APIs públicas da Open-Meteo e inclui testes automatizados com Jest.
+Aplicação web para consultar o clima atual de uma cidade a partir do nome informado pelo usuário. O projeto utiliza HTML, CSS e JavaScript no frontend, além de um backend simples em JavaScript puro com Node.js, consumindo as APIs públicas da Open-Meteo.
 
-## Funcionalidades
-
-- Busca de cidade por nome com conversão para latitude e longitude.
-- Temperatura atual em graus Celsius.
-- Descrição textual do clima e ícone correspondente com Weather Icons.
-- Umidade, velocidade do vento e precipitação do momento da consulta.
-- Previsão de 5 dias com temperaturas máximas e mínimas diárias.
-- Alternância visual automática entre dia e noite conforme a resposta da API.
-- Botão manual de tema escuro.
-- Tratamento de cidade inválida, erro de rede, falhas de API, limite de requisições e respostas incompletas.
-- Aviso de privacidade visível na interface.
-- Política de segurança no HTML com CSP, `referrer` restrito e SRI para o CSS externo.
-
-## Tecnologias
-
-- HTML5
-- CSS3
-- JavaScript
-- Fetch API
-- Open-Meteo Geocoding API
-- Open-Meteo Forecast API
-- Weather Icons 2.0.12 via cdnjs
-- Node.js e npm
-- Jest
-
-## Estrutura
-
-```text
-projeto_clima/
-├── assets/
-│   ├── css/
-│   │   └── style.css
-│   └── js/
-│       └── api.js
-├── tests/
-│   └── api.test.js
+Funcionalidades
+Busca de cidade por nome.
+Conversão da cidade em latitude e longitude.
+Exibição da temperatura atual em graus Celsius.
+Exibição da sensação térmica.
+Exibição da umidade atual.
+Exibição da velocidade do vento.
+Identificação da condição atual do clima.
+Tratamento para cidades não encontradas.
+Tratamento básico de erros durante a consulta.
+Interface simples e responsiva para desktop e dispositivos móveis.
+Tecnologias
+HTML5
+CSS3
+JavaScript
+Node.js
+Fetch API
+Open-Meteo Geocoding API
+Open-Meteo Forecast API
+Estrutura
+app_clima/
 ├── index.html
-├── package.json
-├── package-lock.json
-├── README.md
-├── LICENSE
-├── NOTICE.md
-├── SECURITY_PRIVACY_REPORT.md
-└── LICENSE_COMPLIANCE_REPORT.md
-```
-
-## Instalação
+├── style.css
+├── script.js
+├── server.js
+└── README.md
+Instalação
 
 Requisitos:
 
-- Node.js 18 ou superior recomendado.
-- npm instalado junto com o Node.js.
+Node.js instalado na máquina.
+Editor de código de sua preferência, como Visual Studio Code.
 
 Clone o repositório:
 
-```bash
-git clone https://github.com/victorpgms/projeto_clima.git
-cd projeto_clima
-```
+git clone https://github.com/phcarneiro9/app-clima.git
+cd app-clima
 
-Instale as dependências de desenvolvimento:
+O projeto não utiliza bibliotecas ou frameworks adicionais, portanto não é necessário executar npm install.
 
-```bash
-npm install
-```
+Execução
 
-## Execução
+Abra o terminal dentro da pasta do projeto e execute:
 
-Como o projeto é estático, é possível abrir o arquivo `index.html` diretamente no navegador.
+node server.js
 
-Opcionalmente, use um servidor local para simular melhor um ambiente web:
+O terminal exibirá uma mensagem semelhante a:
 
-```bash
-npx http-server .
-```
+Servidor rodando na porta 3000
+Acesse: http://localhost:3000
 
-Depois acesse o endereço local indicado pelo terminal.
+Depois, abra no navegador:
 
-## Exemplo de Uso
+http://localhost:3000
+Exemplo de Uso
+Inicie o servidor com node server.js.
+Abra http://localhost:3000 no navegador.
+Digite o nome de uma cidade, por exemplo São Paulo.
+Clique no botão para buscar o clima.
+A aplicação exibirá as informações meteorológicas atuais da cidade.
+API
 
-1. Abra a aplicação no navegador.
-2. Digite uma cidade, por exemplo `São Paulo`.
-3. Clique em `Buscar clima`.
-4. A tela exibirá cidade, temperatura atual, descrição do clima, umidade, vento, precipitação e previsão de 5 dias.
-5. Use `Tema escuro` para alternar manualmente a aparência.
+O projeto utiliza a API pública da Open-Meteo.
 
-## Testes
+Primeiro, a aplicação utiliza a API de geolocalização para localizar a cidade e obter suas coordenadas.
 
-Execute a suíte automatizada:
+Exemplo:
 
-```bash
-npm test
-```
+https://geocoding-api.open-meteo.com/v1/search
 
-No PowerShell, se a política de execução bloquear `npm`, use:
+Depois, utiliza latitude e longitude para consultar os dados meteorológicos.
 
-```powershell
-npm.cmd test
-```
+Exemplo:
 
-Gerar cobertura:
+https://api.open-meteo.com/v1/forecast
 
-```bash
-npm test -- --coverage --runInBand
-```
+Os principais dados utilizados na aplicação são:
 
-Os testes cobrem:
+Temperatura atual.
+Sensação térmica.
+Umidade relativa do ar.
+Velocidade do vento.
+Código da condição meteorológica.
+Backend
 
-- Cidade válida e cidade inexistente.
-- Entrada vazia e coordenadas inválidas.
-- Erros HTTP, limite `429`, falha de rede e JSON inválido.
-- Campos obrigatórios do clima atual.
-- Previsão diária incompleta.
-- Formatação de cidade, temperatura, medidas e datas.
-- Renderização do resultado na interface.
-- Botão de tema escuro.
-- Bloqueio de URLs sem HTTPS no helper de rede.
+O backend foi desenvolvido utilizando JavaScript puro com Node.js, sem Express ou outros frameworks.
 
-## Segurança e Privacidade
+O servidor é responsável por:
 
-A aplicação não possui login, backend próprio, banco de dados, cookies, `localStorage` ou chaves de API. A cidade digitada é enviada para a Open-Meteo para obter coordenadas e dados meteorológicos. O navegador também carrega o CSS e as fontes do Weather Icons via cdnjs, o que pode gerar metadados técnicos normais de requisições HTTP para o provedor de CDN.
+Servir os arquivos HTML, CSS e JavaScript.
+Receber o nome da cidade informado pelo usuário.
+Consultar a API da Open-Meteo.
+Processar os dados recebidos.
+Retornar as informações para o frontend.
 
-Medidas aplicadas:
+A porta utilizada pelo projeto é configurada da seguinte forma:
 
-- Uso exclusivo de endpoints `https://`.
-- Bloqueio de URLs não HTTPS no helper `buscarJson`.
-- CSP no `index.html` restringindo scripts, estilos, fontes e conexões externas.
-- `referrer` configurado como `no-referrer`.
-- SRI no CSS externo do Weather Icons.
-- Renderização da previsão via DOM e `textContent`, sem inserir dados externos por `innerHTML`.
-- Mensagens de erro amigáveis ao usuário, sem exposição de detalhes técnicos em produção.
+const PORT = process.env.PORT || 3000;
 
-Leia o relatório completo em [SECURITY_PRIVACY_REPORT.md](SECURITY_PRIVACY_REPORT.md).
+Isso permite que a aplicação funcione localmente e também em serviços de deploy que fornecem uma porta automaticamente.
 
-## Licenciamento e Conformidade
+Responsividade
 
-O projeto está licenciado sob MIT. Consulte [LICENSE](LICENSE).
+A interface foi desenvolvida para funcionar em diferentes tamanhos de tela, incluindo:
 
-Componentes e serviços de terceiros estão listados em [NOTICE.md](NOTICE.md). A Open-Meteo exige atribuição para os dados climáticos, por isso a aplicação exibe crédito próximo aos resultados.
+Computadores.
+Tablets.
+Smartphones.
 
-Para uso comercial, revise os termos atuais da Open-Meteo, pois a API pública é documentada como gratuita para uso não comercial, com dados sob CC BY 4.0.
+O CSS utiliza ajustes responsivos para manter os elementos organizados em dispositivos móveis.
 
-Leia a análise completa em [LICENSE_COMPLIANCE_REPORT.md](LICENSE_COMPLIANCE_REPORT.md).
+Tratamento de Erros
 
-## Fontes Oficiais Consultadas
+A aplicação possui tratamento básico para situações como:
 
-- Open-Meteo: https://open-meteo.com/
-- Repositório Open-Meteo: https://github.com/open-meteo/open-meteo
-- Weather Icons: https://erikflowers.github.io/weather-icons/
-- Repositório Weather Icons: https://github.com/erikflowers/weather-icons
-- cdnjs: https://cdnjs.com/
-- Jest: https://jestjs.io/
+Campo de cidade vazio.
+Cidade não encontrada.
+Falha ao consultar a API.
+Problemas de comunicação com o servidor.
 
-## Autor
+Quando algum erro ocorre, uma mensagem é exibida ao usuário.
 
-Victor Pedro
+Deploy
 
-- GitHub: https://github.com/victorpgms
-- Repositório: https://github.com/victorpgms/projeto_clima
+O projeto está preparado para deploy em serviços que suportam aplicações Node.js, como o Render.
+
+Comando de inicialização:
+
+node server.js
+
+A aplicação utiliza a variável de ambiente PORT disponibilizada pelo serviço de hospedagem.
+
+Objetivo do Projeto
+
+Este projeto foi desenvolvido como atividade prática com o objetivo de aplicar conceitos de desenvolvimento web e integração com APIs REST públicas.
+
+Durante o desenvolvimento foram utilizados conceitos como:
+
+Estruturação de páginas com HTML.
+Estilização e responsividade com CSS.
+Manipulação de elementos com JavaScript.
+Requisições HTTP utilizando Fetch API.
+Consumo de API REST.
+Desenvolvimento de servidor com Node.js.
+Tratamento de dados JSON.
+Integração entre frontend e backend.
+
+Desenvolvido por: Patrick Carneiro
+
+GitHub: https://github.com/phcarneiro9
